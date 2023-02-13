@@ -20,7 +20,7 @@ export default function Home() {
     return(
       <div className={styles.card}>
         <div className={ styles.center}>
-          <h2 style={{color : cardcolor}}>{number}</h2>
+          <h2 style={{color : cardcolor}}>{number.slice(0,1)}</h2>
         </div>
         <div className={styles.cardImage}>
           <Image 
@@ -45,7 +45,7 @@ export default function Home() {
       <button className={styles.button} style={{background : backcolor, color : txtcolor}} onClick={(e)=>{handleClickEvent(txt)}}>{txt}</button>
     )
   }
-  const [newSpin, setNewSpin] = useState();
+  const [newSpin, setNewSpin] = useState({} as any);
   const [isCorrect, setIsCorrect] = useState(false);
   const [gameState, setGameState] = useState(false);
   const [endState, setEndState] = useState(false);
@@ -68,9 +68,14 @@ export default function Home() {
     if(gameState == true){
       setGameState(false)
       getGuess(txt).then(data => {
+        console.log(data)
         setIsCorrect(data.isCorrect)
         setNewSpin(data.card)
         setEndState(true)
+        if(data.isCorrect == false)
+        setTimeout(()=>{
+          setEndState(false)
+        }, 3000)
       })
     }
   }
@@ -100,6 +105,11 @@ export default function Home() {
       </Head>
       <div className={styles.main}>
           <div className={styles.grid}>
+            {endState==true && newSpin?
+            <div>
+              <Card number={newSpin.value} suit={newSpin.suit} color={newSpin.color} />
+            </div> 
+            : 
             <div>
               <Image 
                 id='guessCard'
@@ -111,6 +121,7 @@ export default function Home() {
                 priority
               />
             </div>
+            }
             <Card number={'2'} suit={'DIAMONDS'} color={"RED"} />
             <Card number={'A'} suit={'SPADES'} color={"BLACK"} />
             <Card number={'10'} suit={'CLUBS'} color={"BLACK"} />
