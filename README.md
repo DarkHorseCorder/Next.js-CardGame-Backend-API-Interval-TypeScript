@@ -9,8 +9,6 @@ Welcome! Today, I'm building a working game in React/Next.js.
 
 The goal of this project is fun!!!
 
-[Figma design file](https://www.figma.com/file/9pgpSp0op1eoWuMGtEHU7x/Patrianna---FE-Gaming-Task?node-id=0%3A1&t=W63yF9mNKHYfqh77-1) 
-
 ### Red or Black - Game Rules
 
 A game starts with a pack of (infinite) cards, face down, and one card next to it, face up. The player continues guesses whether the next card is red or black, until they guess incorrectly and lose!
