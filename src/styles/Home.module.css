@@ -170,7 +170,7 @@
 }
 .TRCbutton{
   width: 330px;
-  display: block;
+  height: 76px;
   padding: 10px;
   margin : 10px;
   border-radius: 7px;
@@ -235,7 +235,7 @@
   }
 
   .center {
-    padding: 8rem 0 6rem;
+    /* padding: 8rem 0 6rem; */
   }
 
   .center::before {

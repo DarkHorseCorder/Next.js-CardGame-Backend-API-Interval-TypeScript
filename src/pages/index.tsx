@@ -1,7 +1,7 @@
 import Head from 'next/head'
 import Image from 'next/image'
 import styles from '../styles/Home.module.css'
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect,useRef } from 'react';
 export default function Home() {
   interface Cardprops {
     number:string;
@@ -36,23 +36,60 @@ export default function Home() {
     )
   }
   const Button = ({backcolor, txtcolor, txt} : Buttonprops) => {
+    const handleClickEvent = (txt:string)=>{
+      if(txt == "START")
+        GameStart()
+      else makeSpin(txt);
+    }
     return(
-      <button className={styles.button} style={{background : backcolor, color : txtcolor}}>{txt}</button>
+      <button className={styles.button} style={{background : backcolor, color : txtcolor}} onClick={(e)=>{handleClickEvent(txt)}}>{txt}</button>
     )
   }
   const [newSpin, setNewSpin] = useState();
-  const getGuess =async () => {
+  const [isCorrect, setIsCorrect] = useState(false);
+  const [gameState, setGameState] = useState(false);
+  const [endState, setEndState] = useState(false);
+  const flipTimer:any = useRef();
+  const getGuess =async (txt:string) => {
     const res = await fetch("/api/make-spin", {
       method: "POST",
       body: JSON.stringify({
-        guess: `black`
+        guess: txt.toLowerCase()
       })
     })
     return (res.json())
   }
-  useEffect(()=>{
-    getGuess().then(data => console.log(data))
-  },[])
+
+  const GameStart = () => {
+    setGameState(true)
+    setEndState(false)
+  }
+  const makeSpin = (txt:string) => {
+    if(gameState == true){
+      setGameState(false)
+      getGuess(txt).then(data => {
+        setIsCorrect(data.isCorrect)
+        setNewSpin(data.card)
+        setEndState(true)
+      })
+    }
+  }
+
+  useEffect(() =>{
+    let i:number = 0;
+    const guessCard = document.getElementById('guessCard')
+    if(gameState == true)
+    flipTimer.current = setInterval(()=>{
+      i++;
+      if(guessCard)
+      guessCard.style.transform = `rotateY(${i * 1}deg)`
+    },10)
+    else {
+      if(guessCard)
+      guessCard.style.transform = 'rotateY(0deg)'
+      clearInterval(flipTimer.current);
+    }
+  },[gameState])
   return (
     <>
       <Head>
@@ -65,6 +102,7 @@ export default function Home() {
           <div className={styles.grid}>
             <div>
               <Image 
+                id='guessCard'
                 src='/card.png'
                 className={styles.randomCard}
                 alt="suit"
@@ -78,33 +116,63 @@ export default function Home() {
             <Card number={'10'} suit={'CLUBS'} color={"BLACK"} />
             <Card number={'7'} suit={'HEARTS'} color={"RED"} />
           </div>
-          <div style={{display : 'flex'}}>
-            <div className={styles.TRCbutton}>
-              <div style={{display : 'flex', flexDirection : 'column', justifyContent : 'space-between'}}>
-                <button className={styles.miniButton}>Min</button>
-                <button className={styles.miniButton}>Min</button>
-              </div>
-              <div style={{display : 'flex', alignItems : 'center', margin :" 10px 30px"}}>
-                  <Image 
-                    src='/TRC.png'
-                    className={styles.randomCard}
-                    alt="trc"
-                    width={24}
-                    height={24}
-                    priority
-                  />
-                10.00
-              </div>
-              <div style={{display : 'flex', flexDirection : 'column', justifyContent : 'space-between'}}>
-                <button className={styles.miniButton}>1/2</button>
-                <button className={styles.miniButton}>2x</button>
+          <div style={{display : 'flex', marginTop : '5rem'}}>
+            <div>
+              <div className={styles.TRCbutton}>
+                <div style={{display : 'flex', flexDirection : 'column', justifyContent : 'space-between'}}>
+                  <button className={styles.miniButton}>Min</button>
+                  <button className={styles.miniButton}>Min</button>
+                </div>
+                <div style={{display : 'flex', alignItems : 'center', margin :" 10px 30px", color : "white"}}>
+                    <Image 
+                      src='/TRC.png'
+                      className={styles.randomCard}
+                      alt="trc"
+                      width={24}
+                      height={24}
+                      priority
+                    />
+                  10.00
+                </div>
+                <div style={{display : 'flex', flexDirection : 'column', justifyContent : 'space-between'}}>
+                  <button className={styles.miniButton}>1/2</button>
+                  <button className={styles.miniButton}>2x</button>
+                </div>
               </div>
             </div>
+            <div>
             <Button backcolor={'#1B2233'} txtcolor = {"#FE0000"} txt = {"RED"}/>
+            </div>
+          </div>
+          <div  style={{display : 'flex'}}>
+            <div>
+              <Button backcolor={'#2283F6'} txtcolor = {"white"} txt = {"START"}/>
+            </div>
+            <div>
+              <Button backcolor={'#1B2233'} txtcolor = {"#297FE5"} txt = {"BLACK"}/>
+            </div>
           </div>
           <div>
-            <Button backcolor={'#2283F6'} txtcolor = {"white"} txt = {"START"}/>
-            <Button backcolor={'#1B2233'} txtcolor = {"#297FE5"} txt = {"BLACK"}/>
+            {endState == true?
+              isCorrect == true?
+                <Image 
+                  src='/success.png'
+                  alt="success"
+                  width={250}
+                  height={100}
+                  priority
+                />
+                :
+                <Image 
+                  src='/fail.png'
+                  alt="fail"
+                  width={250}
+                  height={100}
+                  priority
+                />
+              :
+              <></>
+            }
           </div>
       </div>
     </>
